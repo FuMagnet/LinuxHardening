@@ -1,0 +1,27 @@
+Proxmox Firewall einsetzen
+
+Proxmox bietet eine Firewall, die sehr bequem über das WebUI verwaltet werden kann. Dabei muss man allerdings verstehen wie sich das gedacht wurde, wie es funktionieren soll, was ich kurz erklären will:
+
+Wenn man das WebUI von Proxmox öffnet, dann wird sicherlich schon aufgefallen sein, dass dem Host (pve) das "Datacenter" übergeordnet ist. Das liegt schlicht daran, weil Proxmox für den Clusterbetrieb konzipiert ist und sich alle Knoten (PVEs) unterhalb versammeln. Einige Einstellungen, wie bspw. die Firewall, können "clusterweit"  eingestellt werden, um nicht die selbe Einstellung an jedem Knoten einzeln durchführen zu müssen. So auch die Firewall.
+
+Wir beginnen mit der Aktivierung der Firewall auf Datacenter-Ebene:
+
+Klick auf Datacenter
+Klick auf Firewall
+Klick auf Options
+Auf der rechten Seite: Doppel-Click auf Firewall und dort die Checkbox aktivieren
+Die Firewall ist nun aktiviert. Es dauert einen kurzen  Moment. Ein Ping auf die IP des PVE zeigt, dass ICMP-Echo nicht mehr geht. Ein iptables -nvL zeigt die nun greifenden Iptables-Regeln. Es fällt auf, dass nicht nur Port 8006 und 22 offen sind, sondern auch 3128. Dieser ist ein Squid Proxy für den VNC. Wer das nicht benötigt, der sollte eine neue Regel auf Datacenter-Ebene erstellen, die 3128 blockt.
+
+ 
+
+Klick auf Datacenter
+Klick auf Firewall
+Oben auf Add klicken und es öffnet sich ein neues Fenster.
+In dem Fenster wie folgt ausfüllen:
+Direction: in
+Action: DROP
+Enable: (Haken setzen)
+Protocol: tcp
+Dest-Port: 3128
+Dann auf das blaue "Add" klicken und die neue Regel ist kurz drauf aktiv.
+Möchte man auf einzelnen Knoten die Firewall regeln, so klickt man entsprechend auf den den Knoten der gemeint ist, dann auf Firewall usw... Das Gleiche lässt sich dann auch mit den einzelnen VMs erledigen.
